@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Excel for Finance — a hands-on course</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#161d2e; --panel2:#1c2438; --border:#2a3448;
+    --text:#e8ecf6; --muted:#9aa7c2; --accent:#4f9dff; --accent2:#37d0a8;
+    --warn:#ffb454; --bad:#ff6b6b; --good:#37d0a8;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.55;}
+  a{color:var(--accent);}
+  .app{display:flex;min-height:100vh;}
+  .sidebar{width:290px;flex:none;background:var(--panel);border-right:1px solid var(--border);padding:20px 14px;position:sticky;top:0;height:100vh;overflow-y:auto;}
+  .brand{font-weight:700;font-size:1.15rem;margin:4px 6px 2px;}
+  .brand small{display:block;font-weight:400;color:var(--muted);font-size:.78rem;margin-top:2px;}
+  .progress-wrap{margin:14px 6px 18px;}
+  .progress-bar{height:8px;border-radius:5px;background:var(--panel2);overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .4s;}
+  .progress-label{font-size:.75rem;color:var(--muted);margin-top:6px;}
+  .unit-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:16px 8px 6px;}
+  .mod-link{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:.88rem;color:var(--text);}
+  .mod-link:hover{background:var(--panel2);}
+  .mod-link.active{background:var(--panel2);box-shadow:inset 3px 0 0 var(--accent);}
+  .mod-check{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);flex:none;}
+  .mod-check.done{background:var(--good);border-color:var(--good);}
+  .main{flex:1;padding:36px 44px;max-width:900px;}
+  .eyebrow{color:var(--accent2);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600;}
+  h1{margin:6px 0 18px;font-size:1.8rem;}
+  h2{font-size:1.2rem;margin-top:34px;}
+  .lead{color:var(--muted);font-size:1.02rem;margin-bottom:18px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin:18px 0;}
+  code, .cell-ref{font-family:var(--mono);background:var(--panel2);padding:1px 6px;border-radius:5px;font-size:.9em;}
+  pre{background:#0b0f19;border:1px solid var(--border);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--mono);font-size:.85rem;}
+  ul,ol{padding-left:1.3em;}
+  table.grid{border-collapse:collapse;margin:14px 0;font-family:var(--mono);font-size:.86rem;}
+  table.grid th,table.grid td{border:1px solid var(--border);padding:6px 12px;text-align:right;}
+  table.grid th{background:var(--panel2);color:var(--muted);font-weight:600;text-align:center;}
+  table.grid td.label{background:var(--panel2);color:var(--muted);text-align:center;font-weight:600;}
+  table.grid td.text{text-align:left;}
+  .lab{border-left:3px solid var(--accent);}
+  .lab-title{font-weight:700;margin-bottom:4px;}
+  .lab-prompt{color:var(--text);margin-bottom:12px;}
+  .lab-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .lab-row input[type=text]{flex:1;min-width:220px;background:#0b0f19;border:1px solid var(--border);color:var(--text);font-family:var(--mono);padding:9px 12px;border-radius:8px;font-size:.92rem;}
+  button{background:var(--accent);color:#08101f;border:none;border-radius:8px;padding:9px 16px;font-weight:600;cursor:pointer;font-size:.88rem;}
+  button.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border);}
+  button:hover{filter:brightness(1.08);}
+  .feedback{margin-top:10px;font-size:.9rem;padding:8px 12px;border-radius:8px;display:none;}
+  .feedback.good{display:block;background:rgba(55,208,168,.12);color:var(--good);border:1px solid rgba(55,208,168,.3);}
+  .feedback.bad{display:block;background:rgba(255,107,107,.12);color:var(--bad);border:1px solid rgba(255,107,107,.3);}
+  .hint{color:var(--muted);font-size:.82rem;margin-top:8px;cursor:pointer;text-decoration:underline;}
+  .quiz-q{margin:16px 0;}
+  .quiz-q p{font-weight:600;margin-bottom:8px;}
+  .opt{display:block;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;margin:6px 0;cursor:pointer;font-size:.9rem;}
+  .opt:hover{border-color:var(--accent);}
+  .opt.correct{background:rgba(55,208,168,.15);border-color:var(--good);}
+  .opt.wrong{background:rgba(255,107,107,.15);border-color:var(--bad);}
+  .nav-btns{display:flex;justify-content:space-between;margin-top:36px;}
+  .keycap{font-family:var(--mono);background:#0b0f19;border:1px solid var(--border);border-bottom-width:2px;padding:1px 6px;border-radius:5px;font-size:.85em;}
+  .badge{display:inline-block;font-size:.7rem;padding:2px 8px;border-radius:20px;background:var(--panel2);color:var(--muted);margin-left:8px;vertical-align:middle;}
+  @media (max-width:800px){.app{flex-direction:column;}.sidebar{width:100%;height:auto;position:relative;}.main{padding:24px 18px;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar" id="sidebar"></div>
+  <div class="main" id="main"></div>
+</div>
+
+<script>
+/* ---------------- Formula evaluation engine (safe subset for exercises) ---------------- */
+const FX = {
+  SUM: a => flat(a).reduce((s,v)=>s+(typeof v==='number'?v:0),0),
+  AVERAGE: a => { const n=flat(a).filter(v=>typeof v==='number'); return n.reduce((s,v)=>s+v,0)/n.length; },
+  MIN: a => Math.min(...flat(a).filter(v=>typeof v==='number')),
+  MAX: a => Math.max(...flat(a).filter(v=>typeof v==='number')),
+  COUNT: a => flat(a).filter(v=>typeof v==='number').length,
+  COUNTA: a => flat(a).filter(v=>v!==''&&v!==null&&v!==undefined).length,
+  ROUND: (n,d) => { const f=Math.pow(10,d); return Math.round(n*f)/f; },
+  IF: (c,t,f) => c?t:f,
+  IFERROR: (v,f) => (v===undefined||v===null||Number.isNaN(v)) ? f : v,
+  AND: (...a) => a.every(Boolean),
+  OR: (...a) => a.some(Boolean),
+  NOT: a => !a,
+  COUNTIF: (a,crit) => flat(a).filter(v=>matchCrit(v,crit)).length,
+  SUMIF: (a,crit,sumRange) => { const src=flat(a),sum=sumRange?flat(sumRange):src; let t=0; src.forEach((v,i)=>{ if(matchCrit(v,crit)) t+=(typeof sum[i]==='number'?sum[i]:0); }); return t; },
+  AVERAGEIF: (a,crit,avgRange) => { const src=flat(a),avg=avgRange?flat(avgRange):src; let t=0,n=0; src.forEach((v,i)=>{ if(matchCrit(v,crit)){t+=avg[i];n++;} }); return t/n; },
+  VLOOKUP: (val,table,colIdx,exact) => {
+    const rows = to2D(table);
+    for (const row of rows){
+      if (exact===false ? row[0]<=val : eq(row[0],val)) {
+        if (exact===false) continue;
+        return row[colIdx-1];
+      }
+    }
+    if (exact===false){ let best=null; for(const row of rows){ if(row[0]<=val) best=row; } return best?best[colIdx-1]:undefined; }
+    return undefined;
+  },
+  INDEX: (a,r,c) => { const rows=to2D(a); if(c===undefined) return flat(a)[r-1]; return rows[r-1][c-1]; },
+  MATCH: (val,a,type) => { const arr=flat(a); for(let i=0;i<arr.length;i++){ if(eq(arr[i],val)) return i+1; } return -1; },
+  PV: (rate,nper,pmt,fv=0,type=0) => -(pmt*(1+rate*type)*((1-Math.pow(1+rate,-nper))/rate) + fv*Math.pow(1+rate,-nper)),
+  FV: (rate,nper,pmt,pv=0,type=0) => -(pv*Math.pow(1+rate,nper) + pmt*(1+rate*type)*((Math.pow(1+rate,nper)-1)/rate)),
+  PMT: (rate,nper,pv,fv=0,type=0) => -(pv*Math.pow(1+rate,nper)+fv) * rate / ((1+rate*type)*(Math.pow(1+rate,nper)-1)),
+  NPER: (rate,pmt,pv,fv=0,type=0) => Math.log((pmt*(1+rate*type)-fv*rate)/(pmt*(1+rate*type)+pv*rate)) / Math.log(1+rate),
+  RATE: (nper,pmt,pv,fv=0,type=0) => { // simple bisection
+    let lo=-0.99, hi=1; for(let i=0;i<100;i++){ const mid=(lo+hi)/2; const val = pv*Math.pow(1+mid,nper) + pmt*(1+mid*type)*((Math.pow(1+mid,nper)-1)/(mid||1e-9)) + fv;
+      if (Math.abs(val)<1e-6) return mid; if (val>0) hi=mid; else lo=mid; } return (lo+hi)/2; },
+  NPV: (rate,...cfs) => { const arr=flat(cfs); return arr.reduce((s,cf,i)=>s+cf/Math.pow(1+rate,i+1),0); },
+  IRR: (cfs) => { const arr=flat(cfs); let lo=-0.99,hi=5; const npv=r=>arr.reduce((s,cf,i)=>s+cf/Math.pow(1+r,i),0);
+    for(let i=0;i<200;i++){ const mid=(lo+hi)/2; const v=npv(mid); if (Math.abs(v)<1e-6) return mid; if ((npv(lo)>0)===(v>0)) lo=mid; else hi=mid; } return (lo+hi)/2; },
+  CONCAT: (...a) => flat(a).join(''),
+  TEXT: (v,fmt) => String(v),
+};
+function flat(a){ if(!Array.isArray(a)) return [a]; return a.flat(Infinity); }
+function to2D(a){ if(Array.isArray(a) && Array.isArray(a[0])) return a; if(Array.isArray(a)) return a.map(v=>[v]); return [[a]]; }
+function eq(a,b){ if(typeof a==='string'&&typeof b==='string') return a.toLowerCase()===b.toLowerCase(); return a===b; }
+function matchCrit(v,crit){
+  if (typeof crit !== 'string') return eq(v,crit);
+  const m = crit.match(/^(>=|<=|<>|>|<|=)?(.*)$/);
+  const op = m[1]||'='; let rhs = m[2];
+  const num = parseFloat(rhs);
+  if (!isNaN(num) && /^-?\d+(\.\d+)?$/.test(rhs.trim())){
+    const n = typeof v==='number'?v:parseFloat(v);
+    switch(op){ case '>': return n>num; case '<': return n<num; case '>=': return n>=num; case '<=': return n<=num; case '<>': return n!==num; default: return n===num; }
+  }
+  if (op==='<>') return !eq(v,rhs);
+  // wildcard support: * and ?
+  if (/[*?]/.test(rhs)){
+    const re = new RegExp('^'+rhs.replace(/[.+^${}()|[\]\\]/g,'\\$&').replace(/\*/g,'.*').replace(/\?/g,'.')+'$','i');
+    return typeof v==='string' && re.test(v);
+  }
+  return eq(v,rhs);
+}
+
+// Evaluate an Excel-like formula string against a `cells` context: {A1:100, B2:"Widget", ...}
+function evalFormula(raw, cells){
+  let s = raw.trim();
+  if (s.startsWith('=')) s = s.slice(1);
+  s = s.toUpperCase();
+  // whitelist check
+  if (!/^[A-Z0-9_.,:()+\-*/^<>=!$'"%\s&]*$/.test(s)) throw new Error('Unsupported characters in formula');
+  s = s.replace(/\^/g, '**');
+  s = s.replace(/\bTRUE\b/g, 'true').replace(/\bFALSE\b/g, 'false');
+  // expand ranges A1:C5 -> [[...],[...]] using cells + a shape hint stored in cells.__shape (rows,cols letters)
+  s = s.replace(/\$?([A-Z]+)\$?(\d+):\$?([A-Z]+)\$?(\d+)/g, (m,c1,r1,c2,r2)=>{
+    const rows=[]; const rNum1=parseInt(r1), rNum2=parseInt(r2);
+    const colNums = colRange(c1,c2);
+    for(let r=Math.min(rNum1,rNum2); r<=Math.max(rNum1,rNum2); r++){
+      const row = colNums.map(cn => literal(cells[colLetter(cn)+r]));
+      rows.push('['+row.join(',')+']');
+    }
+    return '['+rows.join(',')+']';
+  });
+  // replace remaining single cell refs
+  s = s.replace(/\$?([A-Z]+)\$?(\d+)/g, (m,c,r)=>{
+    const key=c+r;
+    return literal(cells[key]);
+  });
+  // map function names to FX.*
+  const fns = Object.keys(FX);
+  fns.forEach(fn=>{ s = s.replace(new RegExp('\\b'+fn+'\\s*\\(','g'), 'FX.'+fn+'('); });
+  s = s.replace(/<>/g,'!=').replace(/(?<![<>=!])=(?!=)/g,'===');
+  // eslint-disable-next-line no-new-func
+  const fn = new Function('FX', 'return (' + s + ')');
+  return fn(FX);
+}
+function literal(v){
+  if (v===undefined) return '0';
+  if (typeof v==='number') return String(v);
+  return JSON.stringify(String(v));
+}
+function colRange(a,b){ const A=colIndex(a), B=colIndex(b); const lo=Math.min(A,B), hi=Math.max(A,B); const out=[]; for(let i=lo;i<=hi;i++) out.push(i); return out; }
+function colIndex(letters){ let n=0; for(const ch of letters) n=n*26+(ch.charCodeAt(0)-64); return n; }
+function colLetter(n){ let s=''; while(n>0){ const m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=Math.floor((n-1)/26); } return s; }
+
+function fmtNum(n){
+  if (typeof n !== 'number' || Number.isNaN(n)) return String(n);
+  if (Math.abs(n) >= 1000 || Number.isInteger(n)) return n.toLocaleString(undefined,{maximumFractionDigits:2});
+  return n.toFixed(4).replace(/0+$/,'').replace(/\.$/,'');
+}
+
+/* ---------------- Content: units + modules ---------------- */
+const UNITS = [
+  {id:'A', title:'Excel Foundations'},
+  {id:'B', title:'Working with Data'},
+  {id:'C', title:'Financial Functions'},
+  {id:'D', title:'Financial Modeling'},
+];
+
+function gridHTML(headers, rows, refCols){
+  // rows: array of arrays of {v, type:'num'|'text'}; refCols: column letters starting at B (A is row label column optional)
+  let h = '<table class="grid"><tr><th></th>' + headers.map(h=>`<th>${h}</th>`).join('') + '</tr>';
+  rows.forEach((row,i)=>{
+    h += `<tr><td class="label">${i+1}</td>`;
+    row.forEach(cell=>{
+      h += `<td class="${cell.type==='text'?'text':''}">${cell.v}</td>`;
+    });
+    h += '</tr>';
+  });
+  h += '</table>';
+  return h;
+}
+
+const MODULES = [
+{id:'a1', unit:'A', title:'Getting Around Excel', eyebrow:'Foundations · 1',
+ lead:'The interface, workbooks vs. worksheets, and how to move around fast.',
+ body:`
+  <p>A <b>workbook</b> is the whole file; each workbook holds one or more <b>worksheets</b> (tabs at the bottom). Every worksheet is a grid of <b>cells</b>, each identified by its column letter and row number — e.g. <span class="cell-ref">B4</span> is the intersection of column B and row 4.</p>
+  <h2>Navigating without the mouse</h2>
+  <ul>
+    <li><span class="keycap">Ctrl</span> + arrow key — jump to the edge of a block of data</li>
+    <li><span class="keycap">Ctrl</span>+<span class="keycap">Home</span> — jump to A1</li>
+    <li><span class="keycap">Ctrl</span>+<span class="keycap">Shift</span>+arrow — select to the edge of a block</li>
+    <li><span class="keycap">F2</span> — edit the active cell in place</li>
+    <li><span class="keycap">Tab</span> / <span class="keycap">Enter</span> — confirm and move right / down</li>
+  </ul>
+  <p>In finance work you'll live in these shortcuts — analysts rarely touch the mouse when moving around a model. Learning them now pays off on every module after this one.</p>
+  <h2>Entering data</h2>
+  <p>Type a number, text, or a formula starting with <code>=</code>. Excel auto-detects the type: numbers right-align, text left-aligns — that alignment is a quick visual check that a cell holds what you think it holds.</p>
+ `,
+ quiz:[
+   {q:'What identifies a single cell?', opts:['Its row number only','Its column letter and row number','Its worksheet name','Its formula'], a:1},
+   {q:'Which shortcut jumps to the very first cell (A1) of a worksheet?', opts:['Ctrl+Home','Ctrl+End','F2','Ctrl+A'], a:0},
+   {q:'A right-aligned value in a cell most likely means:', opts:['It is text','It is a number','It has an error','It is a formula referencing another sheet'], a:1},
+ ]},
+
+{id:'a2', unit:'A', title:'Formulas & Cell References', eyebrow:'Foundations · 2',
+ lead:'Order of operations, relative vs. absolute references, and autofill — the single most important habit in Excel.',
+ body:`
+  <p>Every formula starts with <code>=</code>. Excel follows standard order of operations: parentheses, then exponents, then multiplication/division, then addition/subtraction.</p>
+  <h2>Relative vs. absolute references</h2>
+  <p>By default, a reference like <span class="cell-ref">B2</span> is <b>relative</b>: if you copy the formula down or across, it shifts with the new cell. Adding a dollar sign locks a reference so it doesn't shift — this is <b>absolute</b>:</p>
+  <ul>
+    <li><span class="cell-ref">$B$2</span> — both column and row locked</li>
+    <li><span class="cell-ref">$B2</span> — column locked, row moves</li>
+    <li><span class="cell-ref">B$2</span> — row locked, column moves</li>
+  </ul>
+  <p>Rule of thumb in finance models: any cell you reference from many other cells (a growth rate, a tax rate, a discount rate) should almost always be locked with <code>$</code> so it doesn't drift when you copy formulas.</p>
+  <h2>Autofill</h2>
+  <p>Drag the small square at the bottom-right of a cell (the "fill handle") to copy a formula across a range — relative references update automatically, absolute ones stay put.</p>
+  <div class="card">
+    ${gridHTML(['A','B','C'], [
+        [{v:'Units'},{v:100},{v:'Growth rate →'}],
+        [{v:'Q1'},{v:100},{v:''}],
+        [{v:'Q2'},{v:''},{v:''}],
+        [{v:'Q3'},{v:''},{v:''}],
+      ])}
+    <p style="color:var(--muted);font-size:.85rem;margin-top:-6px;">Say <span class="cell-ref">C1</span> holds a growth rate of <b>10%</b>, and you want each quarter's units in column B to grow off the previous quarter by that fixed rate. The formula in B3 must reference B2 (relative — shifts as you go down) and C1 (absolute — stays fixed) so it can be copied straight down to B4.</p>
+  </div>
+ `,
+ lab:{
+   title:'Write the formula for B3 (units for Q2)',
+   prompt:'B2 = 100 (Q1 units). C1 = 0.10 (fixed growth rate). Write a formula for B3 that grows B2 by the rate in C1, using an absolute reference for C1 so it still works if copied down to B4.',
+   cells:{B2:100, C1:0.10},
+   check:(val, formula)=>{
+     const okVal = Math.abs(val-110) < 1e-6;
+     const lockedC1 = /\$C\$1|\$C1|C\$1/.test(formula.toUpperCase());
+     return okVal && lockedC1;
+   },
+   failHint:(val,formula)=>{
+     if (!/\$C1|C\$1|\$C\$1/.test(formula.toUpperCase())) return 'Value looks right, but C1 needs at least one $ so the reference survives being copied down.';
+     return `Got ${fmtNum(val)}, expected 110.`;
+   },
+   hint:'Try =B2*(1+$C$1)',
+   answer:'=B2*(1+$C$1)'
+ },
+ quiz:[
+   {q:'What does the $ symbol do in a cell reference?', opts:['Converts the value to currency format','Locks the column and/or row so it does not shift when copied','Marks the cell as an error','Forces the formula to recalculate'], a:1},
+   {q:'You copy a formula containing $B$2 from row 3 down to row 10. What happens to that reference?', opts:['It shifts to $B$9','It stays $B$2','It becomes an error','It becomes B10'], a:1},
+   {q:'Which reference style keeps the column locked but lets the row shift?', opts:['B$2','$B2','$B$2','B2'], a:1},
+ ]},
+
+{id:'a3', unit:'A', title:'Core Functions', eyebrow:'Foundations · 3',
+ lead:'SUM, AVERAGE, MIN/MAX, COUNT/COUNTA, and ROUND — the workhorses behind almost every summary line.',
+ body:`
+  <p>Functions take arguments in parentheses, separated by commas, and can take a <b>range</b> like <span class="cell-ref">B2:B6</span> meaning "every cell from B2 through B6".</p>
+  <table class="grid" style="font-family:inherit;">
+    <tr><th style="text-align:left">Function</th><th style="text-align:left">Does</th></tr>
+    <tr><td class="text"><code>SUM(range)</code></td><td class="text">Adds every number in the range</td></tr>
+    <tr><td class="text"><code>AVERAGE(range)</code></td><td class="text">Mean of the numbers in the range</td></tr>
+    <tr><td class="text"><code>MIN(range)</code> / <code>MAX(range)</code></td><td class="text">Smallest / largest value</td></tr>
+    <tr><td class="text"><code>COUNT(range)</code></td><td class="text">Counts cells containing numbers</td></tr>
+    <tr><td class="text"><code>COUNTA(range)</code></td><td class="text">Counts non-empty cells (numbers or text)</td></tr>
+    <tr><td class="text"><code>ROUND(number, digits)</code></td><td class="text">Rounds to a given number of decimal places</td></tr>
+  </table>
+  <p>In finance decks, <code>ROUND</code> matters more than it looks — unrounded intermediate numbers can make a printed model look like it doesn't add up due to floating-point display, even though the underlying math is correct.</p>
+  <div class="card">
+    ${gridHTML(['A','B'], [
+      [{v:'Revenue', type:'text'},{v:''}],
+      [{v:'Jan',type:'text'},{v:420}],
+      [{v:'Feb',type:'text'},{v:465}],
+      [{v:'Mar',type:'text'},{v:501}],
+      [{v:'Apr',type:'text'},{v:''}],
+    ])}
+  </div>
+ `,
+ lab:{
+   title:'Total revenue for the quarter',
+   prompt:'B2:B4 hold Jan/Feb/Mar revenue (420, 465, 501). Write a formula in B5 that totals them.',
+   cells:{B2:420,B3:465,B4:501},
+   check:(val)=> Math.abs(val-1386)<1e-6,
+   failHint:(val)=>`Got ${fmtNum(val)}, expected 1386.`,
+   hint:'Try =SUM(B2:B4)',
+   answer:'=SUM(B2:B4)'
+ },
+ quiz:[
+   {q:'What does COUNTA count that COUNT does not?', opts:['Negative numbers','Text and non-numeric entries','Blank cells','Formulas only'], a:1},
+   {q:'=ROUND(4.567, 1) returns:', opts:['4.5','4.6','5','4.567'], a:1},
+   {q:'Which is the correct way to reference "every cell from B2 through B6"?', opts:['B2,B6','B2-B6','B2:B6','B2>B6'], a:2},
+ ]},
+
+{id:'a4', unit:'A', title:'Logical Functions', eyebrow:'Foundations · 4',
+ lead:'IF, nested IF, AND/OR, and IFERROR — how models make decisions and stay clean when inputs go wrong.',
+ body:`
+  <p><code>IF(condition, value_if_true, value_if_false)</code> is the backbone of decision logic in a spreadsheet.</p>
+  <pre>=IF(B2&gt;100, "Over budget", "OK")</pre>
+  <h2>Nesting</h2>
+  <p>Chain IFs to handle more than two outcomes:</p>
+  <pre>=IF(B2&gt;=90,"A",IF(B2&gt;=80,"B",IF(B2&gt;=70,"C","F")))</pre>
+  <h2>AND / OR</h2>
+  <p>Combine multiple conditions: <code>AND(cond1,cond2)</code> is true only if both hold; <code>OR(cond1,cond2)</code> is true if either does.</p>
+  <h2>IFERROR</h2>
+  <p><code>IFERROR(formula, value_if_error)</code> catches errors like <code>#DIV/0!</code> and substitutes something readable — essential in financial models where a denominator (like shares outstanding, or a prior-year figure) can legitimately be zero or missing.</p>
+  <pre>=IFERROR(B2/B3, "n/a")</pre>
+ `,
+ lab:{
+   title:'Flag cells over budget, safely',
+   prompt:'B2 holds actual spend (135), C2 holds the budget (120). Write a formula that returns "Over" if actual exceeds budget, otherwise "OK".',
+   cells:{B2:135, C2:120},
+   check:(val)=> String(val).toLowerCase()==='over',
+   failHint:(val)=>`Got "${val}", expected "Over" (case-insensitive).`,
+   hint:'Try =IF(B2>C2,"Over","OK")',
+   answer:'=IF(B2>C2,"Over","OK")'
+ },
+ quiz:[
+   {q:'=IF(B2>=80,"Pass","Fail") — if B2 is 80, the result is:', opts:['Pass','Fail','#VALUE!','80'], a:0},
+   {q:'What does AND(A1>0, B1>0) return if A1=5 and B1=-2?', opts:['TRUE','FALSE','5','#N/A'], a:1},
+   {q:'Why wrap a division in IFERROR in a financial model?', opts:['It makes the formula calculate faster','It prevents #DIV/0! from breaking the sheet when the denominator is 0 or blank','It rounds the result','It is required by Excel'], a:1},
+ ]},
+
+{id:'b1', unit:'B', title:'Lookup Functions', eyebrow:'Data · 1',
+ lead:'VLOOKUP, XLOOKUP, and INDEX/MATCH — pulling one table\'s data into another.',
+ body:`
+  <p>Lookups let you pull a value from a table based on a matching key — e.g. look up a ticker's price from a price table.</p>
+  <h2>VLOOKUP</h2>
+  <pre>=VLOOKUP(lookup_value, table_range, column_index, [exact_match])</pre>
+  <p>Searches the <b>first column</b> of the table for <code>lookup_value</code>, then returns the value that many columns to the right. Use <code>FALSE</code> (or 0) for exact match — almost always what you want in finance.</p>
+  <div class="card">
+    ${gridHTML(['A','B'], [
+      [{v:'Ticker',type:'text'},{v:'Price',type:'text'}],
+      [{v:'AAPL',type:'text'},{v:227}],
+      [{v:'MSFT',type:'text'},{v:415}],
+      [{v:'NVDA',type:'text'},{v:118}],
+    ])}
+    <p style="color:var(--muted);font-size:.85rem;">Table is A1:B4. D1 holds the ticker to look up: "MSFT".</p>
+  </div>
+  <h2>XLOOKUP (modern replacement)</h2>
+  <pre>=XLOOKUP(lookup_value, lookup_array, return_array)</pre>
+  <p>Simpler and more flexible than VLOOKUP — it can look left as well as right, and defaults to exact match.</p>
+  <h2>INDEX/MATCH</h2>
+  <p>The classic combo before XLOOKUP existed, still common in older models: <code>MATCH</code> finds the row position of a value, <code>INDEX</code> returns the value at that position from another column.</p>
+  <pre>=INDEX(B2:B4, MATCH(D1, A2:A4, 0))</pre>
+ `,
+ lab:{
+   title:'Look up a price by ticker',
+   prompt:'A1:B4 is a ticker/price table (header row + AAPL 227, MSFT 415, NVDA 118). D1 = "MSFT". Write a formula that returns MSFT\'s price using VLOOKUP with an exact match.',
+   cells:{A1:'Ticker',B1:'Price',A2:'AAPL',B2:227,A3:'MSFT',B3:415,A4:'NVDA',B4:118,D1:'MSFT'},
+   check:(val)=> Math.abs(val-415)<1e-6,
+   failHint:(val)=>`Got ${fmtNum(val)}, expected 415.`,
+   hint:'Try =VLOOKUP(D1,A2:B4,2,FALSE)',
+   answer:'=VLOOKUP(D1,A2:B4,2,FALSE)'
+ },
+ quiz:[
+   {q:'In VLOOKUP, what must the lookup value match against?', opts:['Any column in the table','The last column','The first column of the table range','The header row'], a:2},
+   {q:'Why use FALSE (exact match) instead of TRUE in most finance lookups?', opts:['FALSE is faster','TRUE only works on numbers','Exact match avoids silently returning the wrong row when there is no perfect match','FALSE is required by Excel'], a:2},
+   {q:'What is the main advantage of XLOOKUP over VLOOKUP?', opts:['It can only be used with text','It can look to the left of the lookup column, unlike VLOOKUP','It is the only function that supports negative numbers','It replaces SUM'], a:1},
+ ]},
+
+{id:'b2', unit:'B', title:'Conditional Aggregation', eyebrow:'Data · 2',
+ lead:'SUMIF/SUMIFS and COUNTIF/COUNTIFS — totals and counts that depend on a condition.',
+ body:`
+  <p><code>SUMIF(range, criteria, [sum_range])</code> sums values only where a condition is met.</p>
+  <pre>=SUMIF(C2:C10, "Equity", D2:D10)</pre>
+  <p>This sums column D wherever the matching cell in column C equals "Equity". Criteria can also be comparisons like <code>"&gt;1000"</code>.</p>
+  <p><code>COUNTIF(range, criteria)</code> counts cells matching a condition without needing a separate sum range.</p>
+  <p>For more than one condition, use the plural forms: <code>SUMIFS(sum_range, range1, crit1, range2, crit2, ...)</code> — note the sum range comes <b>first</b> in SUMIFS, unlike SUMIF.</p>
+  <div class="card">
+    ${gridHTML(['A','B'], [
+      [{v:'Asset Class',type:'text'},{v:'Value',type:'text'}],
+      [{v:'Equity',type:'text'},{v:1200}],
+      [{v:'Bond',type:'text'},{v:800}],
+      [{v:'Equity',type:'text'},{v:950}],
+      [{v:'Cash',type:'text'},{v:300}],
+    ])}
+  </div>
+ `,
+ lab:{
+   title:'Sum only the equity positions',
+   prompt:'A2:A5 holds asset classes (Equity, Bond, Equity, Cash); B2:B5 holds values (1200, 800, 950, 300). Write a formula that sums the value column only for rows where the asset class is "Equity".',
+   cells:{A2:'Equity',A3:'Bond',A4:'Equity',A5:'Cash',B2:1200,B3:800,B4:950,B5:300},
+   check:(val)=> Math.abs(val-2150)<1e-6,
+   failHint:(val)=>`Got ${fmtNum(val)}, expected 2150.`,
+   hint:'Try =SUMIF(A2:A5,"Equity",B2:B5)',
+   answer:'=SUMIF(A2:A5,"Equity",B2:B5)'
+ },
+ quiz:[
+   {q:'In SUMIFS, where does the sum range go relative to the criteria pairs?', opts:['Last','First','It does not matter','It is optional'], a:1},
+   {q:'=COUNTIF(B2:B10,">500") counts:', opts:['Cells equal to 500','Cells greater than 500','All numeric cells','Text cells only'], a:1},
+   {q:'SUMIF with only two arguments (no sum_range) sums:', opts:['Nothing — it requires three arguments','The range being tested itself, wherever the criteria matches','Always zero','The entire worksheet'], a:1},
+ ]},
+
+{id:'b3', unit:'B', title:'Sorting, Filtering & Tables', eyebrow:'Data · 3',
+ lead:'Turning a raw data dump into something you can trust and reuse — structured Tables, filters, and named ranges.',
+ body:`
+  <p><b>Sort</b> reorders rows by one or more columns. <b>Filter</b> (dropdown arrows via Data → Filter, or <span class="keycap">Ctrl</span>+<span class="keycap">Shift</span>+<span class="keycap">L</span>) temporarily hides rows that don't match a condition, without deleting anything.</p>
+  <h2>Structured Tables</h2>
+  <p>Select your data and press <span class="keycap">Ctrl</span>+<span class="keycap">T</span> to convert a range into an official Excel <b>Table</b>. Benefits that matter in finance work:</p>
+  <ul>
+    <li>Formulas auto-fill down as new rows are added — no more dragging fill handles after a data refresh</li>
+    <li>You can reference columns by name (<code>Table1[Revenue]</code>) instead of brittle cell ranges</li>
+    <li>Built-in banding and header filters for free</li>
+  </ul>
+  <h2>Named ranges</h2>
+  <p>Give a cell or range a name (Formulas → Define Name) — e.g. name a discount-rate cell <code>DiscountRate</code> and write <code>=NPV(DiscountRate, ...)</code> instead of <code>=NPV($C$4,...)</code>. Self-documenting, and immune to reference drift if rows are inserted above it.</p>
+ `,
+ quiz:[
+   {q:'What is the shortcut to convert a selected range into a structured Table?', opts:['Ctrl+T','Ctrl+F','Ctrl+N','Ctrl+Shift+T'], a:0},
+   {q:'Filtering a data range does what to the hidden rows?', opts:['Permanently deletes them','Hides them from view without deleting the data','Moves them to a new sheet','Converts them to text'], a:1},
+   {q:'A key advantage of a named range like DiscountRate over $C$4 is:', opts:['It calculates faster','It is more readable and stays correct if rows are inserted above it','It only works with SUM','Excel requires it for IF statements'], a:1},
+ ]},
+
+{id:'b4', unit:'B', title:'Conditional Formatting & Charts', eyebrow:'Data · 4',
+ lead:'Making numbers scannable — color rules, data bars, and picking the right chart for financial data.',
+ body:`
+  <p><b>Conditional formatting</b> (Home → Conditional Formatting) changes a cell's appearance based on its value — e.g. red fill for negative variances, a green-to-red color scale for margins, or data bars for a quick visual ranking.</p>
+  <p>Common finance use: highlight any covenant ratio that breaches a threshold, so a reviewer catches it without reading every cell.</p>
+  <h2>Choosing a chart</h2>
+  <ul>
+    <li><b>Line chart</b> — a metric over time (revenue by quarter, a stock price series)</li>
+    <li><b>Bar/column chart</b> — comparing discrete categories (revenue by segment)</li>
+    <li><b>Waterfall chart</b> — showing how a starting value moves to an ending value through a sequence of additions/subtractions (e.g. EBITDA bridge, cash flow bridge)</li>
+    <li><b>Combo chart</b> — bars for a metric, a line for a related rate (e.g. revenue bars with a margin % line on a secondary axis)</li>
+  </ul>
+  <p>Avoid pie charts for anything with more than ~4 categories or for time series — they're hard to read precisely, which matters when the audience is deciding based on the numbers.</p>
+ `,
+ quiz:[
+   {q:'Which chart type is purpose-built for showing how a value moves from a starting point to an ending point through a series of gains and losses?', opts:['Pie chart','Waterfall chart','Scatter plot','Radar chart'], a:1},
+   {q:'A good use of conditional formatting in a financial model is:', opts:['Making all cells the same color for consistency','Auto-highlighting covenant breaches or negative variances so they are not missed','Replacing the need for formulas','Hiding rows with errors'], a:1},
+   {q:'For a metric tracked over 20 quarters, the best chart choice is generally:', opts:['Pie chart','Line chart','Radar chart','Doughnut chart'], a:1},
+ ]},
+
+{id:'c1', unit:'C', title:'Time Value of Money in Excel', eyebrow:'Financial functions · 1',
+ lead:'PV, FV, RATE, and NPER — the four functions behind every loan, bond, and savings calculation.',
+ body:`
+  <p>These functions share the same five inputs, and each one solves for whichever piece is missing: <code>rate</code> (per period), <code>nper</code> (number of periods), <code>pmt</code> (payment per period), <code>pv</code> (present value), <code>fv</code> (future value).</p>
+  <table class="grid" style="font-family:inherit;">
+    <tr><th style="text-align:left">Function</th><th style="text-align:left">Solves for</th></tr>
+    <tr><td class="text"><code>PV(rate,nper,pmt,[fv])</code></td><td class="text">Present value</td></tr>
+    <tr><td class="text"><code>FV(rate,nper,pmt,[pv])</code></td><td class="text">Future value</td></tr>
+    <tr><td class="text"><code>RATE(nper,pmt,pv,[fv])</code></td><td class="text">Interest rate per period</td></tr>
+    <tr><td class="text"><code>NPER(rate,pmt,pv,[fv])</code></td><td class="text">Number of periods</td></tr>
+  </table>
+  <p><b>Sign convention matters</b>: Excel treats cash you pay out as negative and cash you receive as positive. If you invest $1,000 today (cash out) to receive money later (cash in), enter the $1,000 as -1000 — otherwise the answer's sign will confuse you, even though the magnitude may look plausible.</p>
+  <pre>=FV(0.05, 10, 0, -1000)   ' $1,000 today, growing at 5% for 10 years, no periodic payment</pre>
+ `,
+ lab:{
+   title:'Future value of a lump-sum investment',
+   prompt:'You invest $1,000 today (B1) at a 6% annual rate (B2) for 10 years (B3), with no periodic payments. Write a formula for the future value. Remember the sign convention for the amount invested.',
+   cells:{B1:1000, B2:0.06, B3:10},
+   check:(val)=> Math.abs(val-1790.847)<0.5,
+   failHint:(val)=>`Got ${fmtNum(val)}, expected about 1790.85 — check the sign on the present value.`,
+   hint:'Try =FV(B2,B3,0,-B1)',
+   answer:'=FV(B2,B3,0,-B1)'
+ },
+ quiz:[
+   {q:'Why enter an outgoing investment amount as a negative number in PV/FV formulas?', opts:['Excel requires all inputs to be negative','It follows the convention that cash paid out is negative and cash received is positive, so the sign of the result is meaningful','It makes the formula calculate faster','Negative numbers are rounded differently'], a:1},
+   {q:'Which function would you use to find the interest rate implied by a loan\'s payment, term, and principal?', opts:['RATE','SUM','VLOOKUP','ROUND'], a:0},
+   {q:'In =FV(rate,nper,pmt,pv), what does nper represent?', opts:['The interest rate','The number of compounding periods','The net present value','The payment amount'], a:1},
+ ]},
+
+{id:'c2', unit:'C', title:'Loans & Amortization', eyebrow:'Financial functions · 2',
+ lead:'PMT, IPMT, PPMT — breaking a loan payment into interest and principal, period by period.',
+ body:`
+  <p><code>PMT(rate, nper, pv)</code> returns the fixed periodic payment that fully amortizes a loan of amount <code>pv</code> over <code>nper</code> periods at <code>rate</code> per period.</p>
+  <pre>=PMT(0.05/12, 360, 400000)   ' 30-year mortgage, 5% annual rate, monthly payments</pre>
+  <p>Each payment is split between interest and principal — early payments are mostly interest, later ones mostly principal:</p>
+  <ul>
+    <li><code>IPMT(rate, per, nper, pv)</code> — the interest portion of payment number <code>per</code></li>
+    <li><code>PPMT(rate, per, nper, pv)</code> — the principal portion of payment number <code>per</code></li>
+  </ul>
+  <p>An <b>amortization schedule</b> is a row-per-period table with columns for payment, interest, principal, and remaining balance — built by dragging PMT/IPMT/PPMT formulas down, with the balance column subtracting each period's principal from the prior balance.</p>
+ `,
+ lab:{
+   title:'Monthly payment on a loan',
+   prompt:'B1 = 24000 (loan amount), B2 = 0.06 (annual rate), B3 = 48 (months). Write a formula for the monthly payment, using a monthly rate (annual rate / 12).',
+   cells:{B1:24000, B2:0.06, B3:48},
+   check:(val)=> Math.abs(Math.abs(val)-563.67)<0.5,
+   failHint:(val)=>`Got ${fmtNum(val)}, expected about -563.67 (Excel returns PMT as a negative, since it's cash paid out) or +563.67 — check you divided the rate by 12.`,
+   hint:'Try =PMT(B2/12,B3,B1)',
+   answer:'=PMT(B2/12,B3,B1)'
+ },
+ quiz:[
+   {q:'On a 30-year mortgage, the early monthly payments are mostly:', opts:['Principal','Interest','Fees','Equal parts interest and principal, always'], a:1},
+   {q:'To get a monthly PMT from an annual rate and a term in years, you should:', opts:['Use the annual rate and years directly','Divide the annual rate by 12 and multiply years by 12 for nper','Multiply the annual rate by 12','Leave the rate as annual but use monthly nper'], a:1},
+   {q:'What does an amortization schedule show that a single PMT calculation does not?', opts:['The total loan amount','How each payment splits between interest and principal over time, and the remaining balance each period','The interest rate','Nothing new — they show the same information'], a:1},
+ ]},
+
+{id:'c3', unit:'C', title:'NPV & IRR in Excel', eyebrow:'Financial functions · 3',
+ lead:'Discounting a series of cash flows to today, and finding the rate that makes NPV zero.',
+ body:`
+  <p><code>NPV(rate, value1, value2, ...)</code> discounts a series of <i>future</i> cash flows back to today at <code>rate</code>. It assumes the first cash flow happens one period from now — if there's an upfront cost at time 0, add it separately outside the NPV function.</p>
+  <pre>=NPV(0.10, B2:B6) + B1   ' B1 = initial outlay at time 0 (negative), B2:B6 = years 1-5 cash flows</pre>
+  <p><code>IRR(range)</code> finds the discount rate that makes NPV of the whole series (including the initial outlay, included in the range this time) equal to zero — it's the "break-even" rate of return for the project.</p>
+  <pre>=IRR(B1:B6)   ' B1 = initial outlay (negative), B2:B6 = subsequent cash flows</pre>
+  <p>Decision rule: accept a project if NPV &gt; 0 at your required rate, or equivalently if IRR exceeds your required rate (cost of capital).</p>
+ `,
+ lab:{
+   title:'NPV of a project',
+   prompt:'B1 = -1000 (initial outlay, already at time 0). B2:B4 = 400, 400, 400 (years 1-3 cash flows). Discount rate is 8% (B5). Write a formula for total NPV, adding the time-0 outlay to the discounted future cash flows.',
+   cells:{B1:-1000, B2:400, B3:400, B4:400, B5:0.08},
+   check:(val)=> Math.abs(val-31.12)<1,
+   failHint:(val)=>`Got ${fmtNum(val)}, expected about 31.2 — remember B1 is already at time 0 and should be added outside NPV().`,
+   hint:'Try =NPV(B5,B2:B4)+B1',
+   answer:'=NPV(B5,B2:B4)+B1'
+ },
+ quiz:[
+   {q:'By default, =NPV(rate, B2:B6) assumes the first value in the range occurs:', opts:['At time 0 (today)','One period from now','At the end of the range','Two periods from now'], a:1},
+   {q:'If a project\'s IRR is 14% and your required rate of return (cost of capital) is 10%, you should:', opts:['Reject it — IRR is too low','Accept it — IRR exceeds the required rate','It is impossible to decide from IRR alone','Always choose the option with the lower IRR'], a:1},
+   {q:'When using IRR(range), where should the initial (negative) outlay go?', opts:['It should be excluded from the range entirely','Included as the first value in the same range passed to IRR','Added outside the function, like with NPV','It does not matter'], a:1},
+ ]},
+
+{id:'c4', unit:'C', title:'Sensitivity Tools', eyebrow:'Financial functions · 4',
+ lead:'Data Tables, Goal Seek, and Scenario Manager — asking "what if?" without rebuilding the model each time.',
+ body:`
+  <p>Real models rarely hinge on one fixed assumption — you want to see how the output moves as an input changes.</p>
+  <h2>Data Tables (What-If Analysis → Data Table)</h2>
+  <p>Builds a grid showing an output formula's result across a range of one or two changing inputs — e.g. NPV across a range of discount rates and growth rates simultaneously. Once set up, Excel recalculates the whole grid automatically.</p>
+  <h2>Goal Seek</h2>
+  <p>Works backwards: you specify the output you want and which input cell to change, and Excel solves for the input. Example: "what growth rate makes NPV exactly zero?" — set the NPV cell to 0 by changing the growth-rate cell.</p>
+  <h2>Scenario Manager</h2>
+  <p>Lets you save named sets of input values (e.g. "Base case", "Upside", "Downside") and switch between them with one click, with every dependent formula updating to match — useful for board decks that need to show a range of outcomes without three separate spreadsheets.</p>
+ `,
+ quiz:[
+   {q:'You want to see NPV across a grid of both discount rate and growth rate at once. The right tool is:', opts:['Goal Seek','A two-variable Data Table','COUNTIF','A pie chart'], a:1},
+   {q:'Goal Seek is best described as working:', opts:['Forwards — you give inputs and it gives an output','Backwards — you specify a target output and it solves for the input','Only with text values','As a replacement for all formulas'], a:1},
+   {q:'Scenario Manager is most useful for:', opts:['Sorting data','Switching between named sets of assumptions (e.g. base/upside/downside) with one click','Formatting cells','Creating charts'], a:1},
+ ]},
+
+{id:'d1', unit:'D', title:'Building a 3-Statement Model', eyebrow:'Modeling · 1',
+ lead:'How the income statement, balance sheet, and cash flow statement link together in one live model.',
+ body:`
+  <p>A 3-statement model is three tabs (or sections) that reference each other so that changing one assumption flows through everywhere it should:</p>
+  <ul>
+    <li><b>Income statement</b> — revenue down to net income, driven by growth and margin assumptions</li>
+    <li><b>Balance sheet</b> — assets, liabilities, and equity; net income flows into retained earnings</li>
+    <li><b>Cash flow statement</b> — reconciles net income to the actual change in cash, and that ending cash feeds back into the balance sheet's cash line</li>
+  </ul>
+  <h2>The core links to get right</h2>
+  <ul>
+    <li>Net income (income statement) → retained earnings (balance sheet)</li>
+    <li>Depreciation (income statement, as an expense) → added back in the cash flow statement, and reduces PP&amp;E on the balance sheet</li>
+    <li>Changes in working capital accounts (receivables, payables, inventory) on the balance sheet → drive the operating cash flow section</li>
+    <li>Ending cash (cash flow statement) → cash balance on the balance sheet</li>
+  </ul>
+  <p>The balance sheet should <b>balance</b> — assets equal liabilities plus equity — every period. If it doesn't, there is a broken link somewhere, usually a working-capital or cash-flow formula that isn't tied back correctly. Build a simple check row (<code>=Assets - Liabilities - Equity</code>, should always show 0) so an error surfaces immediately rather than being discovered in a client meeting.</p>
+ `,
+ quiz:[
+   {q:'Net income from the income statement primarily flows into which balance sheet line?', opts:['Cash','Retained earnings (within equity)','Accounts payable','Inventory'], a:1},
+   {q:'What should a well-built 3-statement model always do at the end of every period?', opts:['Show a profit','Balance — assets equal liabilities plus equity','Match the prior year exactly','Show positive cash flow'], a:1},
+   {q:'A simple "check row" that returns Assets − Liabilities − Equity is useful because:', opts:['It looks professional','It should always equal zero, so any nonzero result flags a broken link immediately','It calculates taxes','It is required by GAAP'], a:1},
+ ]},
+
+{id:'d2', unit:'D', title:'DCF Model in Excel', eyebrow:'Modeling · 2',
+ lead:'Projecting free cash flow, discounting it, and adding a terminal value to estimate what a business is worth today.',
+ body:`
+  <p>A discounted cash flow (DCF) model estimates a business's value as the present value of the cash it will generate. The core build:</p>
+  <ol>
+    <li>Project unlevered free cash flow (FCF) for an explicit forecast period, typically 5 years: <code>FCF = EBIT×(1-tax) + D&amp;A − CapEx − Δ Working Capital</code></li>
+    <li>Discount each year's FCF back to today at the discount rate (WACC): <code>PV = FCF / (1+WACC)^t</code></li>
+    <li>Estimate a <b>terminal value</b> for everything beyond the forecast period, most commonly with the Gordon Growth formula: <code>TV = FCF_final × (1+g) / (WACC − g)</code></li>
+    <li>Discount the terminal value back to today at the same rate, using the <i>final forecast year's</i> discount factor</li>
+    <li>Sum all the discounted FCFs plus the discounted terminal value to get enterprise value</li>
+  </ol>
+  <p>The terminal value is usually the majority of total value in a DCF — small changes in the long-run growth rate <code>g</code> or WACC move the answer a lot, which is exactly why the sensitivity tools from the previous unit (Data Tables on WACC × g) matter here.</p>
+ `,
+ lab:{
+   title:'Discount a single year\'s free cash flow',
+   prompt:'B1 = 500 (Year 3 free cash flow). B2 = 0.09 (WACC). Write a formula for the present value of that Year 3 cash flow (discount 3 periods).',
+   cells:{B1:500, B2:0.09},
+   check:(val)=> Math.abs(val-386.09)<0.5,
+   failHint:(val)=>`Got ${fmtNum(val)}, expected about 386.1.`,
+   hint:'Try =B1/(1+B2)^3',
+   answer:'=B1/(1+B2)^3'
+ },
+ quiz:[
+   {q:'In the Gordon Growth terminal value formula FCF×(1+g)/(WACC−g), what happens if g approaches WACC?', opts:['Terminal value approaches zero','Terminal value grows towards infinity, which is why g must stay meaningfully below WACC','Nothing changes','The formula automatically caps the result'], a:1},
+   {q:'Which of these is NOT typically part of unlevered free cash flow?', opts:['EBIT after tax','Depreciation & amortization added back','Interest expense on debt','Capital expenditures subtracted'], a:2},
+   {q:'Why does the terminal value usually make up the majority of a DCF\'s total value?', opts:['It always represents a coding error','It captures all cash flows beyond the explicit forecast, i.e. most of the company\'s life','Terminal value is not actually discounted','It is a regulatory requirement'], a:1},
+ ]},
+
+{id:'d3', unit:'D', title:'Dashboard & Modeling Best Practices', eyebrow:'Modeling · 3',
+ lead:'The habits that separate a model people trust from one nobody wants to touch.',
+ body:`
+  <p>Technical correctness isn't enough — a model has to be usable and auditable by someone other than you.</p>
+  <h2>Color coding convention (industry standard)</h2>
+  <ul>
+    <li><b>Blue text</b> — a hardcoded input (a number you typed in, like a growth-rate assumption)</li>
+    <li><b>Black text</b> — a formula that references other cells on the same sheet</li>
+    <li><b>Green text</b> — a formula that pulls from a different sheet or workbook</li>
+  </ul>
+  <p>This lets anyone scan a model and immediately see what's an assumption versus what's calculated — critical when someone needs to stress-test your assumptions later.</p>
+  <h2>Other habits worth building now</h2>
+  <ul>
+    <li>Never bury a hardcoded number inside a formula (e.g. <code>=B2*1.08</code>) — put the 8% growth rate in its own labeled cell and reference it, so it's visible and easy to change</li>
+    <li>Use <code>IFERROR</code> around anything that could divide by zero or fail a lookup</li>
+    <li>Add check rows (like the balance-sheet check from the previous module) that should always equal zero or TRUE, and conditionally format them red if they don't</li>
+    <li>One row = one time period, one column = one time period — keep the grain consistent so formulas can be copied across without exceptions</li>
+    <li>Label units in headers (e.g. "Revenue ($M)") so nobody misreads scale</li>
+  </ul>
+ `,
+ quiz:[
+   {q:'Under the standard color-coding convention, blue text in a cell typically means:', opts:['An error','A hardcoded input/assumption typed directly into that cell','A link to another workbook','A chart reference'], a:1},
+   {q:'Why avoid burying a number like 1.08 directly inside a formula (=B2*1.08)?', opts:['Excel cannot calculate it','It hides the assumption, making it hard to find and change later — it should live in its own labeled cell','It is slower to calculate','It causes a circular reference'], a:1},
+   {q:'A check row that should always equal zero (like Assets − Liabilities − Equity) is best paired with:', opts:['Deleting it once the model works','Conditional formatting that flags it if it is ever nonzero','Hiding the row','Converting it to text'], a:1},
+ ]},
+];
+
+/* ---------------- App state / rendering ---------------- */
+const LS_KEY = 'excel_finance_academy_progress_v1';
+function loadProgress(){ try{ return JSON.parse(localStorage.getItem(LS_KEY))||{}; }catch(e){ return {}; } }
+function saveProgress(p){ try{ localStorage.setItem(LS_KEY, JSON.stringify(p)); }catch(e){} }
+let progress = loadProgress();
+let current = MODULES[0].id;
+
+function renderSidebar(){
+  const doneCount = MODULES.filter(m=>progress[m.id]).length;
+  const pct = Math.round(100*doneCount/MODULES.length);
+  let html = `<div class="brand">Excel for Finance<small>A hands-on course</small></div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="progress-label">${doneCount} / ${MODULES.length} modules complete</div>
+  </div>`;
+  UNITS.forEach(u=>{
+    html += `<div class="unit-title">Unit ${u.id} — ${u.title}</div>`;
+    MODULES.filter(m=>m.unit===u.id).forEach(m=>{
+      html += `<div class="mod-link ${m.id===current?'active':''}" onclick="goTo('${m.id}')">
+        <span class="mod-check ${progress[m.id]?'done':''}"></span>${m.title}
+      </div>`;
+    });
+  });
+  document.getElementById('sidebar').innerHTML = html;
+}
+
+function goTo(id){ current = id; renderAll(); window.scrollTo(0,0); }
+window.goTo = goTo;
+
+function renderMain(){
+  const idx = MODULES.findIndex(m=>m.id===current);
+  const m = MODULES[idx];
+  let html = `<div class="eyebrow">${m.eyebrow}</div><h1>${m.title}</h1><p class="lead">${m.lead}</p>${m.body}`;
+
+  if (m.lab){
+    html += `<div class="card lab">
+      <div class="lab-title">🧪 Practice — ${m.lab.title}</div>
+      <div class="lab-prompt">${m.lab.prompt}</div>
+      <div class="lab-row">
+        <input type="text" id="labInput" placeholder="Type your formula, e.g. =SUM(A1:A5)" />
+        <button onclick="checkLab()">Check</button>
+        <button class="secondary" onclick="revealLab()">Reveal answer</button>
+      </div>
+      <div class="feedback" id="labFeedback"></div>
+    </div>`;
+  }
+
+  if (m.quiz){
+    html += `<h2>Check your understanding</h2><div id="quizArea">`;
+    m.quiz.forEach((q,i)=>{
+      html += `<div class="quiz-q" data-qi="${i}"><p>${i+1}. ${q.q}</p>`;
+      q.opts.forEach((opt,oi)=>{
+        html += `<div class="opt" onclick="answerQuiz(${i},${oi})">${opt}</div>`;
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `<div class="nav-btns">
+    <button class="secondary" ${idx===0?'disabled style="opacity:.4"':''} onclick="goTo('${idx>0?MODULES[idx-1].id:m.id}')">← Previous</button>
+    <button ${idx===MODULES.length-1?'disabled style="opacity:.4"':''} onclick="completeAndNext('${m.id}','${idx<MODULES.length-1?MODULES[idx+1].id:''}')">Mark complete & continue →</button>
+  </div>`;
+
+  document.getElementById('main').innerHTML = html;
+  window._quizState = (m.quiz||[]).map(()=>null);
+}
+
+function completeAndNext(id, nextId){
+  progress[id] = true;
+  saveProgress(progress);
+  if (nextId) goTo(nextId); else renderAll();
+}
+window.completeAndNext = completeAndNext;
+
+function answerQuiz(qi, oi){
+  const m = MODULES.find(x=>x.id===current);
+  const q = m.quiz[qi];
+  const container = document.querySelector(`.quiz-q[data-qi="${qi}"]`);
+  const opts = container.querySelectorAll('.opt');
+  opts.forEach((el,i)=>{
+    el.classList.remove('correct','wrong');
+    if (i===q.a) el.classList.add('correct');
+    else if (i===oi) el.classList.add('wrong');
+  });
+}
+window.answerQuiz = answerQuiz;
+
+function checkLab(){
+  const m = MODULES.find(x=>x.id===current);
+  const input = document.getElementById('labInput');
+  const fb = document.getElementById('labFeedback');
+  const formula = input.value;
+  if (!formula.trim()){ fb.className='feedback bad'; fb.textContent='Type a formula first.'; return; }
+  try{
+    const val = evalFormula(formula, m.lab.cells);
+    const ok = m.lab.check(val, formula);
+    if (ok){
+      fb.className='feedback good';
+      fb.textContent = `✓ Correct — result is ${fmtNum(val)}.`;
+    } else {
+      fb.className='feedback bad';
+      fb.textContent = '✗ ' + (m.lab.failHint ? m.lab.failHint(val, formula) : `Got ${fmtNum(val)}, that's not quite it.`);
+    }
+  }catch(e){
+    fb.className='feedback bad';
+    fb.textContent = '✗ Could not evaluate that formula (' + e.message + '). ' + (m.lab.hint||'');
+  }
+}
+window.checkLab = checkLab;
+
+function revealLab(){
+  const m = MODULES.find(x=>x.id===current);
+  const fb = document.getElementById('labFeedback');
+  fb.className='feedback good';
+  fb.textContent = 'Answer: ' + m.lab.answer;
+  document.getElementById('labInput').value = m.lab.answer;
+}
+window.revealLab = revealLab;
+
+function renderAll(){ renderSidebar(); renderMain(); }
+renderAll();
+</script>
+</body>
+</html>
