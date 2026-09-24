@@ -208,6 +208,7 @@ function gridHTML(headers, rows, refCols){
 
 const MODULES = [
 {id:'a1', unit:'A', title:'Getting Around Excel', eyebrow:'Foundations · 1',
+ wbNote:'No workbook needed for this one — just practice the shortcuts above in any spreadsheet you already have open.',
  lead:'The interface, workbooks vs. worksheets, and how to move around fast.',
  body:`
   <p>A <b>workbook</b> is the whole file; each workbook holds one or more <b>worksheets</b> (tabs at the bottom). Every worksheet is a grid of <b>cells</b>, each identified by its column letter and row number — e.g. <span class="cell-ref">B4</span> is the intersection of column B and row 4.</p>
@@ -230,6 +231,7 @@ const MODULES = [
  ]},
 
 {id:'a2', unit:'A', title:'Formulas & Cell References', eyebrow:'Foundations · 2',
+ wb:{file:'workbooks/unit-a-foundations.xlsx', sheet:'A2 Cell References'},
  lead:'Order of operations, relative vs. absolute references, and autofill — the single most important habit in Excel.',
  body:`
   <p>Every formula starts with <code>=</code>. Excel follows standard order of operations: parentheses, then exponents, then multiplication/division, then addition/subtraction.</p>
@@ -276,6 +278,7 @@ const MODULES = [
  ]},
 
 {id:'a3', unit:'A', title:'Core Functions', eyebrow:'Foundations · 3',
+ wb:{file:'workbooks/unit-a-foundations.xlsx', sheet:'A3 Core Functions'},
  lead:'SUM, AVERAGE, MIN/MAX, COUNT/COUNTA, and ROUND — the workhorses behind almost every summary line.',
  body:`
   <p>Functions take arguments in parentheses, separated by commas, and can take a <b>range</b> like <span class="cell-ref">B2:B6</span> meaning "every cell from B2 through B6".</p>
@@ -315,6 +318,7 @@ const MODULES = [
  ]},
 
 {id:'a4', unit:'A', title:'Logical Functions', eyebrow:'Foundations · 4',
+ wb:{file:'workbooks/unit-a-foundations.xlsx', sheet:'A4 Logical Functions'},
  lead:'IF, nested IF, AND/OR, and IFERROR — how models make decisions and stay clean when inputs go wrong.',
  body:`
   <p><code>IF(condition, value_if_true, value_if_false)</code> is the backbone of decision logic in a spreadsheet.</p>
@@ -344,6 +348,7 @@ const MODULES = [
  ]},
 
 {id:'b1', unit:'B', title:'Lookup Functions', eyebrow:'Data · 1',
+ wb:{file:'workbooks/unit-b-data.xlsx', sheet:'B1 Lookup Functions'},
  lead:'VLOOKUP, XLOOKUP, and INDEX/MATCH — pulling one table\'s data into another.',
  body:`
   <p>Lookups let you pull a value from a table based on a matching key — e.g. look up a ticker's price from a price table.</p>
@@ -382,6 +387,7 @@ const MODULES = [
  ]},
 
 {id:'b2', unit:'B', title:'Conditional Aggregation', eyebrow:'Data · 2',
+ wb:{file:'workbooks/unit-b-data.xlsx', sheet:'B2 Conditional Aggregation'},
  lead:'SUMIF/SUMIFS and COUNTIF/COUNTIFS — totals and counts that depend on a condition.',
  body:`
   <p><code>SUMIF(range, criteria, [sum_range])</code> sums values only where a condition is met.</p>
@@ -415,6 +421,7 @@ const MODULES = [
  ]},
 
 {id:'b3', unit:'B', title:'Sorting, Filtering & Tables', eyebrow:'Data · 3',
+ wb:{file:'workbooks/unit-b-data.xlsx', sheet:"B3 Tables (Start) — then compare to B3 Tables (Example)"},
  lead:'Turning a raw data dump into something you can trust and reuse — structured Tables, filters, and named ranges.',
  body:`
   <p><b>Sort</b> reorders rows by one or more columns. <b>Filter</b> (dropdown arrows via Data → Filter, or <span class="keycap">Ctrl</span>+<span class="keycap">Shift</span>+<span class="keycap">L</span>) temporarily hides rows that don't match a condition, without deleting anything.</p>
@@ -435,6 +442,7 @@ const MODULES = [
  ]},
 
 {id:'b4', unit:'B', title:'Conditional Formatting & Charts', eyebrow:'Data · 4',
+ wb:{file:'workbooks/unit-b-data.xlsx', sheet:"B4 Formatting-Charts (Start) — then compare to (Ex)"},
  lead:'Making numbers scannable — color rules, data bars, and picking the right chart for financial data.',
  body:`
   <p><b>Conditional formatting</b> (Home → Conditional Formatting) changes a cell's appearance based on its value — e.g. red fill for negative variances, a green-to-red color scale for margins, or data bars for a quick visual ranking.</p>
@@ -455,6 +463,7 @@ const MODULES = [
  ]},
 
 {id:'c1', unit:'C', title:'Time Value of Money in Excel', eyebrow:'Financial functions · 1',
+ wb:{file:'workbooks/unit-c-functions.xlsx', sheet:'C1 Time Value of Money'},
  lead:'PV, FV, RATE, and NPER — the four functions behind every loan, bond, and savings calculation.',
  body:`
   <p>These functions share the same five inputs, and each one solves for whichever piece is missing: <code>rate</code> (per period), <code>nper</code> (number of periods), <code>pmt</code> (payment per period), <code>pv</code> (present value), <code>fv</code> (future value).</p>
@@ -484,6 +493,7 @@ const MODULES = [
  ]},
 
 {id:'c2', unit:'C', title:'Loans & Amortization', eyebrow:'Financial functions · 2',
+ wb:{file:'workbooks/unit-c-functions.xlsx', sheet:'C2 Loans & Amortization'},
  lead:'PMT, IPMT, PPMT — breaking a loan payment into interest and principal, period by period.',
  body:`
   <p><code>PMT(rate, nper, pv)</code> returns the fixed periodic payment that fully amortizes a loan of amount <code>pv</code> over <code>nper</code> periods at <code>rate</code> per period.</p>
@@ -511,6 +521,7 @@ const MODULES = [
  ]},
 
 {id:'c3', unit:'C', title:'NPV & IRR in Excel', eyebrow:'Financial functions · 3',
+ wb:{file:'workbooks/unit-c-functions.xlsx', sheet:'C3 NPV & IRR'},
  lead:'Discounting a series of cash flows to today, and finding the rate that makes NPV zero.',
  body:`
   <p><code>NPV(rate, value1, value2, ...)</code> discounts a series of <i>future</i> cash flows back to today at <code>rate</code>. It assumes the first cash flow happens one period from now — if there's an upfront cost at time 0, add it separately outside the NPV function.</p>
@@ -535,6 +546,7 @@ const MODULES = [
  ]},
 
 {id:'c4', unit:'C', title:'Sensitivity Tools', eyebrow:'Financial functions · 4',
+ wb:{file:'workbooks/unit-c-functions.xlsx', sheet:'C4 Sensitivity Tools'},
  lead:'Data Tables, Goal Seek, and Scenario Manager — asking "what if?" without rebuilding the model each time.',
  body:`
   <p>Real models rarely hinge on one fixed assumption — you want to see how the output moves as an input changes.</p>
@@ -552,6 +564,7 @@ const MODULES = [
  ]},
 
 {id:'d1', unit:'D', title:'Building a 3-Statement Model', eyebrow:'Modeling · 1',
+ wb:{file:'workbooks/unit-d-modeling.xlsx', sheet:'D1 Income Statement (+ D1 Balance Sheet, D1 Cash Flow)'},
  lead:'How the income statement, balance sheet, and cash flow statement link together in one live model.',
  body:`
   <p>A 3-statement model is three tabs (or sections) that reference each other so that changing one assumption flows through everywhere it should:</p>
@@ -576,6 +589,7 @@ const MODULES = [
  ]},
 
 {id:'d2', unit:'D', title:'DCF Model in Excel', eyebrow:'Modeling · 2',
+ wb:{file:'workbooks/unit-d-modeling.xlsx', sheet:'D2 DCF Model'},
  lead:'Projecting free cash flow, discounting it, and adding a terminal value to estimate what a business is worth today.',
  body:`
   <p>A discounted cash flow (DCF) model estimates a business's value as the present value of the cash it will generate. The core build:</p>
@@ -604,6 +618,7 @@ const MODULES = [
  ]},
 
 {id:'d3', unit:'D', title:'Dashboard & Modeling Best Practices', eyebrow:'Modeling · 3',
+ wb:{file:'workbooks/unit-d-modeling.xlsx', sheet:'D3 Best Practices'},
  lead:'The habits that separate a model people trust from one nobody wants to touch.',
  body:`
   <p>Technical correctness isn't enough — a model has to be usable and auditable by someone other than you.</p>
@@ -663,6 +678,18 @@ function renderMain(){
   const idx = MODULES.findIndex(m=>m.id===current);
   const m = MODULES[idx];
   let html = `<div class="eyebrow">${m.eyebrow}</div><h1>${m.title}</h1><p class="lead">${m.lead}</p>${m.body}`;
+
+  if (m.wb){
+    html += `<div class="card" style="border-left:3px solid var(--accent2);">
+      <div class="lab-title">📊 Practice in real Excel</div>
+      <p style="margin:6px 0 10px;">Open <a href="${m.wb.file}" download>${m.wb.file.split('/').pop()}</a> and go to the <b>${m.wb.sheet}</b> tab. Fill in the yellow cells, then check your work against that workbook's <b>Answer Key</b> tab.</p>
+    </div>`;
+  } else if (m.wbNote){
+    html += `<div class="card" style="border-left:3px solid var(--accent2);">
+      <div class="lab-title">📊 Practice in real Excel</div>
+      <p style="margin:6px 0 0;">${m.wbNote}</p>
+    </div>`;
+  }
 
   if (m.lab){
     html += `<div class="card lab">
