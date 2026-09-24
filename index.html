@@ -319,18 +319,39 @@ const MODULES = [
 
 {id:'a4', unit:'A', title:'Logical Functions', eyebrow:'Foundations · 4',
  wb:{file:'workbooks/unit-a-foundations.xlsx', sheet:'A4 Logical Functions'},
- lead:'IF, nested IF, AND/OR, and IFERROR — how models make decisions and stay clean when inputs go wrong.',
+ lead:'IF, nested IF, AND/OR/NOT, and IFERROR — how models make decisions and stay clean when inputs go wrong.',
  body:`
-  <p><code>IF(condition, value_if_true, value_if_false)</code> is the backbone of decision logic in a spreadsheet.</p>
+  <h2>IF — the basic building block</h2>
+  <p><code>IF(condition, value_if_true, value_if_false)</code> takes three arguments:</p>
+  <ul>
+    <li><b>condition</b> — anything that evaluates to TRUE or FALSE, usually a comparison like <code>B2&gt;100</code>, <code>B2=0</code>, or <code>B2&lt;&gt;""</code> (not blank)</li>
+    <li><b>value_if_true</b> — what the formula returns when the condition is TRUE</li>
+    <li><b>value_if_false</b> — what it returns when the condition is FALSE</li>
+  </ul>
   <pre>=IF(B2&gt;100, "Over budget", "OK")</pre>
-  <h2>Nesting</h2>
-  <p>Chain IFs to handle more than two outcomes:</p>
+  <p>Read this as a sentence: "if B2 is greater than 100, show 'Over budget', otherwise show 'OK'." Excel evaluates <code>B2&gt;100</code> first — that comparison by itself already returns a real value, TRUE or FALSE — then IF picks whichever of the other two arguments matches.</p>
+  <p>The comparison operators you'll use inside a condition: <code>&gt;</code> greater than, <code>&lt;</code> less than, <code>&gt;=</code> greater or equal, <code>&lt;=</code> less or equal, <code>=</code> equal to, <code>&lt;&gt;</code> not equal to.</p>
+  <p>The third argument is optional — <code>=IF(B2&gt;100,"Over")</code> returns FALSE (not blank) when the condition isn't met, which is rarely what you want, so it's good practice to always spell out both outcomes.</p>
+  <h2>Nested IF — handling more than two outcomes</h2>
+  <p>A single IF only branches two ways. To sort a value into more than two buckets, put another IF inside the "false" slot of the first one, chaining as many as you need:</p>
   <pre>=IF(B2&gt;=90,"A",IF(B2&gt;=80,"B",IF(B2&gt;=70,"C","F")))</pre>
-  <h2>AND / OR</h2>
-  <p>Combine multiple conditions: <code>AND(cond1,cond2)</code> is true only if both hold; <code>OR(cond1,cond2)</code> is true if either does.</p>
-  <h2>IFERROR</h2>
-  <p><code>IFERROR(formula, value_if_error)</code> catches errors like <code>#DIV/0!</code> and substitutes something readable — essential in financial models where a denominator (like shares outstanding, or a prior-year figure) can legitimately be zero or missing.</p>
+  <p>Excel checks each condition <b>in order</b> and stops at the first one that's TRUE — it never checks the rest. That's why the conditions must be ordered from most restrictive to least restrictive (≥90 before ≥80 before ≥70): if you tested <code>B2&gt;=70</code> first, a score of 95 would incorrectly stop there and return "C", since 95 does satisfy ≥70 and IF never gets to look at the ≥90 test at all.</p>
+  <p>Trace it for B2 = 82: is 82≥90? No → move to the nested IF → is 82≥80? Yes → return "B", and stop. The two remaining conditions are never evaluated.</p>
+  <h2>AND / OR / NOT — combining conditions</h2>
+  <p>These three take one or more TRUE/FALSE conditions and combine them into a single TRUE/FALSE result, which you then typically feed into an IF:</p>
+  <ul>
+    <li><code>AND(cond1, cond2, ...)</code> — TRUE only if <b>every</b> condition is TRUE. <code>AND(B2&gt;0, C2&gt;0)</code> is only TRUE when both B2 and C2 are positive.</li>
+    <li><code>OR(cond1, cond2, ...)</code> — TRUE if <b>at least one</b> condition is TRUE. <code>OR(B2&lt;0, C2&lt;0)</code> is TRUE if either one is negative.</li>
+    <li><code>NOT(condition)</code> — flips TRUE to FALSE and vice versa. <code>NOT(B2=0)</code> means "B2 is not zero."</li>
+  </ul>
+  <p>These almost always live inside an IF's condition slot, because AND/OR/NOT on their own just return TRUE or FALSE, not a custom message:</p>
+  <pre>=IF(AND(B2&gt;0, C2&gt;0), "Both positive", "Check inputs")</pre>
+  <p>Trace it for B2=5, C2=-2: <code>AND(5&gt;0, -2&gt;0)</code> → <code>AND(TRUE, FALSE)</code> → FALSE (since not every condition held) → IF returns "Check inputs".</p>
+  <h2>IFERROR — failing gracefully</h2>
+  <p>Some formulas can legitimately error out even when nothing is "wrong" with your model — dividing by a value that happens to be zero, or looking up something that isn't in the table yet. Common errors you'll see: <code>#DIV/0!</code> (division by zero), <code>#N/A</code> (lookup found no match), <code>#VALUE!</code> (wrong type of input, like text where a number was expected), <code>#REF!</code> (a cell reference is now invalid, usually because a row/column was deleted).</p>
+  <p><code>IFERROR(formula, value_if_error)</code> wraps any formula: if it would normally produce an error, IFERROR catches it and returns your fallback value instead; if it works fine, IFERROR just passes the real result through untouched.</p>
   <pre>=IFERROR(B2/B3, "n/a")</pre>
+  <p>This is essential in financial models because a denominator (shares outstanding, prior-year revenue, a peer's metric) can legitimately be zero or missing, especially for a new company or a not-yet-populated forecast period — without IFERROR, one blank cell can cascade a wall of <code>#DIV/0!</code> across an entire model.</p>
  `,
  lab:{
    title:'Flag cells over budget, safely',
@@ -344,6 +365,8 @@ const MODULES = [
  quiz:[
    {q:'=IF(B2>=80,"Pass","Fail") — if B2 is 80, the result is:', opts:['Pass','Fail','#VALUE!','80'], a:0},
    {q:'What does AND(A1>0, B1>0) return if A1=5 and B1=-2?', opts:['TRUE','FALSE','5','#N/A'], a:1},
+   {q:'In =IF(B2>=90,"A",IF(B2>=80,"B","C")), why must ">=90" be tested before ">=80"?', opts:['It does not matter, Excel checks every condition anyway','Excel stops at the first TRUE condition, so testing ">=80" first would misclassify a score of 95 as a "B"','">=90" is faster to calculate','Excel requires conditions in descending order'], a:1},
+   {q:'What does NOT(B2=0) mean?', opts:['B2 equals zero','B2 does not equal zero','B2 is blank','B2 is negative'], a:1},
    {q:'Why wrap a division in IFERROR in a financial model?', opts:['It makes the formula calculate faster','It prevents #DIV/0! from breaking the sheet when the denominator is 0 or blank','It rounds the result','It is required by Excel'], a:1},
  ]},
 
